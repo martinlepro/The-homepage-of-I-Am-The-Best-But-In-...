@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Découvrez mes projets, créations Minecraft, mods, jeux et speedruns."
+    >
+
+    <meta name="theme-color" content="#090b12">
+
+    <title>I Am The Best — Projets & Réseaux</title>
+
+    <style>
+        /* =========================
+           VARIABLES
+        ========================== */
+
+        :root {
+            --background: #090b12;
+            --background-secondary: #10131e;
+            --card: rgba(21, 25, 39, 0.78);
+            --card-hover: rgba(27, 32, 50, 0.95);
+
+            --text: #f8f9ff;
+            --text-secondary: #a9afc3;
+
+            --primary: #7c5cff;
+            --primary-light: #9c86ff;
+            --secondary: #28d7ff;
+
+            --border: rgba(255, 255, 255, 0.09);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+
+            --radius: 22px;
+            --max-width: 1180px;
+        }
+
+        /* =========================
+           BASE
+        ========================== */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 100px;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+
+            color: var(--text);
+            background:
+                radial-gradient(
+                    circle at 15% 10%,
+                    rgba(124, 92, 255, 0.18),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 85% 30%,
+                    rgba(40, 215, 255, 0.12),
+                    transparent 28%
+                ),
+                var(--background);
+
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+
+            background-image:
+                linear-gradient(
+                    rgba(255, 255, 255, 0.018) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255, 255, 255, 0.018) 1px,
+                    transparent 1px
+                );
+
+            background-size: 42px 42px;
+            mask-image: linear-gradient(to bottom, black, transparent 90%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        .container {
+            width: min(calc(100% - 40px), var(--max-width));
+            margin-inline: auto;
+        }
+
+        .gradient-text {
+            color: transparent;
+            background: linear-gradient(
+                100deg,
+                var(--primary-light),
+                var(--secondary)
+            );
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+        /* =========================
+           NAVIGATION
+        ========================== */
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+
+            border-bottom: 1px solid transparent;
+            background: rgba(9, 11, 18, 0.68);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            transition:
+                border-color 0.25s ease,
+                background 0.25s ease;
+        }
+
+        .navbar.scrolled {
+            border-color: var(--border);
+            background: rgba(9, 11, 18, 0.9);
+        }
+
+        .nav-content {
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 13px;
+
+            background: linear-gradient(
+                135deg,
+                var(--primary),
+                #4d39be
+            );
+
+            box-shadow: 0 8px 30px rgba(124, 92, 255, 0.35);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .nav-links a {
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-button {
+            padding: 10px 17px;
+            color: var(--text) !important;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+
+            transition:
+                transform 0.2s ease,
+                background 0.2s ease !important;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* =========================
+           HERO
+        ========================== */
+
+        .hero {
+            min-height: 100vh;
+            padding: 150px 0 90px;
+
+            display: flex;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin-inline: auto;
+        }
+
+        .status {
+            width: fit-content;
+            margin: 0 auto 28px;
+            padding: 9px 15px;
+
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            color: #cbd0df;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.045);
+
+            font-size: 0.88rem;
+            font-weight: 750;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            flex: 0 0 auto;
+
+            border-radius: 50%;
+            background: #40e49b;
+            box-shadow: 0 0 16px rgba(64, 228, 155, 0.8);
+
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            50% {
+                opacity: 0.45;
+                transform: scale(0.8);
+            }
+        }
+
+        .hero h1 {
+            max-width: 850px;
+            margin: 0 auto;
+
+            font-size: clamp(3.1rem, 9vw, 7.3rem);
+            line-height: 0.95;
+            letter-spacing: -0.065em;
+        }
+
+        .hero-description {
+            max-width: 680px;
+            margin: 30px auto 0;
+
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 2vw, 1.22rem);
+        }
+
+        .hero-actions {
+            margin-top: 38px;
+
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .button {
+            min-height: 52px;
+            padding: 0 23px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            border: 1px solid var(--border);
+            border-radius: 14px;
+
+            font-weight: 850;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+        }
+
+        .button-primary {
+            border-color: transparent;
+            background: linear-gradient(
+                135deg,
+                var(--primary),
+                #5940dc
+            );
+
+            box-shadow: 0 12px 34px rgba(124, 92, 255, 0.32);
+        }
+
+        .button-primary:hover {
+            box-shadow: 0 16px 40px rgba(124, 92, 255, 0.44);
+        }
+
+        .button-secondary {
+            background: rgba(255, 255, 255, 0.045);
+        }
+
+        .button-secondary:hover {
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .scroll-indicator {
+            margin-top: 85px;
+            color: #72798f;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .scroll-arrow {
+            display: block;
+            margin-top: 10px;
+            font-size: 1.4rem;
+            animation: bounce 1.6s infinite;
+        }
+
+        @keyframes bounce {
+            50% {
+                transform: translateY(8px);
+            }
+        }
+
+        /* =========================
+           SECTIONS
+        ========================== */
+
+        .section {
+            padding: 110px 0;
+        }
+
+        .section-heading {
+            max-width: 680px;
+            margin-bottom: 48px;
+        }
+
+        .section-label {
+            display: inline-block;
+            margin-bottom: 12px;
+
+            color: var(--secondary);
+            font-size: 0.82rem;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .section-heading h2 {
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            line-height: 1.05;
+            letter-spacing: -0.045em;
+        }
+
+        .section-heading p {
+            margin-top: 17px;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        /* =========================
+           PROJECTS
+        ========================== */
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .project-card {
+            min-height: 390px;
+            padding: 26px;
+
+            display: flex;
+            flex-direction: column;
+
+            overflow: hidden;
+            position: relative;
+
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--card);
+            box-shadow: var(--shadow);
+
+            transition:
+                transform 0.3s ease,
+                border-color 0.3s ease,
+                background 0.3s ease;
+        }
+
+        .project-card::before {
+            content: "";
+            width: 180px;
+            height: 180px;
+
+            position: absolute;
+            top: -95px;
+            right: -80px;
+
+            border-radius: 50%;
+            background: var(--project-color, var(--primary));
+            opacity: 0.14;
+            filter: blur(12px);
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(156, 134, 255, 0.38);
+            background: var(--card-hover);
+        }
+
+        .project-icon {
+            width: 62px;
+            height: 62px;
+            display: grid;
+            place-items: center;
+
+            position: relative;
+            z-index: 1;
+
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.055);
+
+            font-size: 1.8rem;
+        }
+
+        .project-card h3 {
+            margin-top: 28px;
+            font-size: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .project-card p {
+            margin-top: 13px;
+            color: var(--text-secondary);
+            font-size: 0.96rem;
+        }
+
+        .tags {
+            margin-top: 20px;
+
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            padding: 6px 10px;
+
+            color: #c5cad9;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.035);
+
+            font-size: 0.76rem;
+            font-weight: 800;
+        }
+
+        .project-link {
+            margin-top: auto;
+            padding-top: 26px;
+
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            color: var(--primary-light);
+            font-weight: 850;
+        }
+
+        .project-link span {
+            transition: transform 0.2s ease;
+        }
+
+        .project-link:hover span {
+            transform: translateX(5px);
+        }
+
+        /* =========================
+           SOCIAL NETWORKS
+        ========================== */
+
+        .socials-section {
+            position: relative;
+        }
+
+        .socials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .social-card {
+            min-height: 145px;
+            padding: 22px;
+
+            display: flex;
+            align-items: center;
+            gap: 18px;
+
+            border: 1px solid var(--border);
+            border-radius: 19px;
+            background: rgba(255, 255, 255, 0.035);
+
+            transition:
+                transform 0.25s ease,
+                border-color 0.25s ease,
+                background 0.25s ease;
+        }
+
+        .social-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--social-color);
+            background: rgba(255, 255, 255, 0.065);
+        }
+
+        .social-icon {
+            width: 58px;
+            height: 58px;
+            flex: 0 0 auto;
+
+            display: grid;
+            place-items: center;
+
+            color: white;
+            border-radius: 17px;
+            background: var(--social-color);
+
+            font-size: 1.55rem;
+            font-weight: 950;
+
+            box-shadow: 0 10px 25px color-mix(
+                in srgb,
+                var(--social-color) 28%,
+                transparent
+            );
+        }
+
+        .social-information {
+            min-width: 0;
+        }
+
+        .social-information h3 {
+            font-size: 1.08rem;
+        }
+
+        .social-information p {
+            max-width: 100%;
+            overflow: hidden;
+
+            color: var(--text-secondary);
+            font-size: 0.83rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .social-arrow {
+            margin-left: auto;
+            color: #7f869c;
+            font-size: 1.25rem;
+
+            transition:
+                color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .social-card:hover .social-arrow {
+            color: white;
+            transform: translate(3px, -3px);
+        }
+
+        /* =========================
+           CONTACT BANNER
+        ========================== */
+
+        .contact-banner {
+            padding: 60px;
+            overflow: hidden;
+            position: relative;
+
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            border-radius: 30px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(124, 92, 255, 0.27),
+                    rgba(40, 215, 255, 0.09)
+                ),
+                var(--background-secondary);
+
+            text-align: center;
+        }
+
+        .contact-banner::after {
+            content: "";
+            width: 280px;
+            height: 280px;
+
+            position: absolute;
+            right: -120px;
+            bottom: -180px;
+
+            border-radius: 50%;
+            background: var(--secondary);
+            opacity: 0.13;
+            filter: blur(20px);
+        }
+
+        .contact-banner h2 {
+            position: relative;
+            z-index: 1;
+
+            font-size: clamp(2rem, 5vw, 3.8rem);
+            line-height: 1.05;
+            letter-spacing: -0.045em;
+        }
+
+        .contact-banner p {
+            max-width: 620px;
+            margin: 18px auto 28px;
+            position: relative;
+            z-index: 1;
+
+            color: #bcc2d4;
+        }
+
+        .contact-banner .button {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        footer {
+            padding: 36px 0;
+
+            color: #767e94;
+            border-top: 1px solid var(--border);
+
+            font-size: 0.9rem;
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .back-to-top {
+            color: var(--text-secondary);
+            font-weight: 750;
+        }
+
+        .back-to-top:hover {
+            color: white;
+        }
+
+        /* =========================
+           ANIMATIONS
+        ========================== */
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+
+            transition:
+                opacity 0.7s ease,
+                transform 0.7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 950px) {
+            .projects-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .socials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                width: min(calc(100% - 28px), var(--max-width));
+            }
+
+            .nav-links a:not(.nav-button) {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 130px;
+            }
+
+            .hero h1 {
+                font-size: clamp(3rem, 17vw, 5rem);
+            }
+
+            .section {
+                padding: 80px 0;
+            }
+
+            .projects-grid,
+            .socials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .project-card {
+                min-height: 340px;
+            }
+
+            .contact-banner {
+                padding: 48px 22px;
+                border-radius: 23px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body id="accueil">
+
+    <!-- Navigation -->
+    <header class="navbar" id="navbar">
+        <nav class="container nav-content" aria-label="Navigation principale">
+
+            <a class="logo" href="#accueil" aria-label="Retour à l'accueil">
+                <span class="logo-icon">IB</span>
+                <span>I Am The Best</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="#projets">Projets</a>
+                <a href="#reseaux">Réseaux</a>
+                <a class="nav-button" href="#reseaux">
+                    Me retrouver
+                </a>
+            </div>
+
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="container hero-content">
+
+                <div class="status">
+                    <span class="status-dot"></span>
+                    Créateur, développeur et joueur
+                </div>
+
+                <h1>
+                    Je transforme mes
+                    <span class="gradient-text">idées</span>
+                    en projets.
+                </h1>
+
+                <p class="hero-description">
+                    Bienvenue dans mon univers. Je crée des mods, des cartes,
+                    des ressources Minecraft, des projets gaming et du contenu
+                    vidéo.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="button button-primary" href="#projets">
+                        Découvrir mes projets
+                        <span aria-hidden="true">↓</span>
+                    </a>
+
+                    <a
+                        class="button button-secondary"
+                        href="https://www.youtube.com/@IAmTheBestButInYoutube"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Voir ma chaîne YouTube
+                        <span aria-hidden="true">↗</span>
+                    </a>
+                </div>
+
+                <div class="scroll-indicator" aria-hidden="true">
+                    Explorer
+                    <span class="scroll-arrow">⌄</span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Projects -->
+        <section class="section" id="projets">
+            <div class="container">
+
+                <div class="section-heading reveal">
+                    <span class="section-label">Portfolio</span>
+
+                    <h2>
+                        Mes projets
+                        <span class="gradient-text">créatifs</span>
+                    </h2>
+
+                    <p>
+                        Retrouve mes créations sur différentes plateformes :
+                        mods, ressources, cartes, vidéos et projets gaming.
+                    </p>
+                </div>
+
+                <div class="projects-grid">
+
+                    <article
+                        class="project-card reveal"
+                        style="--project-color: #1bd96a;"
+                    >
+                        <div class="project-icon" aria-hidden="true">🧩</div>
+
+                        <h3>Mods Minecraft</h3>
+
+                        <p>
+                            Des modifications et contenus personnalisés pour
+                            enrichir l'expérience de jeu Minecraft.
+                        </p>
+
+                        <div class="tags">
+                            <span class="tag">Minecraft</span>
+                            <span class="tag">Modding</span>
+                            <span class="tag">Modrinth</span>
+                        </div>
+
+                        <a
+                            class="project-link"
+                            href="https://modrinth.com/user/I_Am_The_Best_But_In_Modrinth"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Voir sur Modrinth
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </article>
+
+                    <article
+                        class="project-card reveal"
+                        style="--project-color: #f16436;"
+                    >
+                        <div class="project-icon" aria-hidden="true">⚒️</div>
+
+                        <h3>Projets CurseForge</h3>
+
+                        <p>
+                            Découvre mes différents projets, extensions et
+                            contenus disponibles sur CurseForge.
+                        </p>
+
+                        <div class="tags">
+                            <span class="tag">Mods</span>
+                            <span class="tag">Add-ons</span>
+                            <span class="tag">CurseForge</span>
+                        </div>
+
+                        <a
+                            class="project-link"
+                            href="https://www.curseforge.com/members/i_am_the_dev_in_games/projects"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Voir les projets
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </article>
+
+                    <article
+                        class="project-card reveal"
+                        style="--project-color: #56bd45;"
+                    >
+                        <div class="project-icon" aria-hidden="true">🌍</div>
+
+                        <h3>Créations Minecraft</h3>
+
+                        <p>
+                            Des cartes, constructions, skins ou autres créations
+                            partagées avec la communauté Minecraft.
+                        </p>
+
+                        <div class="tags">
+                            <span class="tag">Maps</span>
+                            <span class="tag">Créations</span>
+                            <span class="tag">Minecraft</span>
+                        </div>
+
+                        <a
+                            class="project-link"
+                            href="https://www.planetminecraft.com/member/i_am_the_best_but_in_minecraft/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Voir le profil
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </article>
+
+                    <article
+                        class="project-card reveal"
+                        style="--project-color: #ff374f;"
+                    >
+                        <div class="project-icon" aria-hidden="true">🎮</div>
+
+                        <h3>Mods de jeux</h3>
+
+                        <p>
+                            Mes modifications, ressources et projets créés pour
+                            différents jeux vidéo.
+                        </p>
+
+                        <div class="tags">
+                            <span class="tag">Gaming</span>
+                            <span class="tag">Modding</span>
+                            <span class="tag">GameBanana</span>
+                        </div>
+
+                        <a
+                            class="project-link"
+                            href="https://gamebanana.com/members/5415323"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Voir sur GameBanana
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </article>
+
+                    <article
+                        class="project-card reveal"
+                        style="--project-color: #e92525;"
+                    >
+                        <div class="project-icon" aria-hidden="true">▶️</div>
+
+                        <h3>Vidéos YouTube</h3>
+
+                        <p>
+                            Des vidéos autour de mes projets, de Minecraft,
+                            du développement et de mes expériences gaming.
+                        </p>
+
+                        <div class="tags">
+                            <span class="tag">Vidéos</span>
+                            <span class="tag">Gaming</span>
+                            <span class="tag">YouTube</span>
+                        </div>
+
+                        <a
+                            class="project-link"
+                            href="https://www.youtube.com/@IAmTheBestButInYoutube"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Voir les vidéos
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </article>
+
+                    <article
+                        class="project-card reveal"
+                        style="--project-color: #f6c744;"
+                    >
+                        <div class="project-icon" aria-hidden="true">⏱️</div>
+
+                        <h3>Speedruns</h3>
+
+                        <p>
+                            Mes performances, mes temps et mes tentatives
+                            de speedrun sur différents jeux.
+                        </p>
+
+                        <div class="tags">
+                            <span class="tag">Speedrun</span>
+                            <span class="tag">Records</span>
+                            <span class="tag">Gaming</span>
+                        </div>
+
+                        <a
+                            class="project-link"
+                            href="https://www.speedrun.com/users/IATBBISpeedrun"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Voir mes temps
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Social networks -->
+        <section class="section socials-section" id="reseaux">
+            <div class="container">
+
+                <div class="section-heading reveal">
+                    <span class="section-label">Liens</span>
+
+                    <h2>
+                        Tous mes
+                        <span class="gradient-text">réseaux</span>
+                    </h2>
+
+                    <p>
+                        Suis mon travail et retrouve l'ensemble de mes créations
+                        sur mes différentes plateformes.
+                    </p>
+                </div>
+
+                <div class="socials-grid">
+
+                    <a
+                        class="social-card reveal"
+                        style="--social-color: #ff0033;"
+                        href="https://www.youtube.com/@IAmTheBestButInYoutube"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Ouvrir mon profil YouTube"
+                    >
+                        <div class="social-icon">▶</div>
+
+                        <div class="social-information">
+                            <h3>YouTube</h3>
+                            <p>@IAmTheBestButInYoutube</p>
+                        </div>
+
+                        <span class="social-arrow" aria-hidden="true">↗</span>
+                    </a>
+
+                    <a
+                        class="social-card reveal"
+                        style="--social-color: #1bd96a;"
+                        href="https://modrinth.com/user/I_Am_The_Best_But_In_Modrinth"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Ouvrir mon profil Modrinth"
+                    >
+                        <div class="social-icon">M</div>
+
+                        <div class="social-information">
+                            <h3>Modrinth</h3>
+                            <p>I_Am_The_Best_But_In_Modrinth</p>
+                        </div>
+
+                        <span class="social-arrow" aria-hidden="true">↗</span>
+                    </a>
+
+                    <a
+                        class="social-card reveal"
+                        style="--social-color: #f16436;"
+                        href="https://www.curseforge.com/members/i_am_the_dev_in_games/projects"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Ouvrir mes projets CurseForge"
+                    >
+                        <div class="social-icon">C</div>
+
+                        <div class="social-information">
+                            <h3>CurseForge</h3>
+                            <p>i_am_the_dev_in_games</p>
+                        </div>
+
+                        <span class="social-arrow" aria-hidden="true">↗</span>
+                    </a>
+
+                    <a
+                        class="social-card reveal"
+                        style="--social-color: #48a83b;"
+                        href="https://www.planetminecraft.com/member/i_am_the_best_but_in_minecraft/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Ouvrir mon profil Planet Minecraft"
+                    >
+                        <div class="social-icon">P</div>
+
+                        <div class="social-information">
+                            <h3>Planet Minecraft</h3>
+                            <p>i_am_the_best_but_in_minecraft</p>
+                        </div>
+
+                        <span class="social-arrow" aria-hidden="true">↗</span>
+                    </a>
+
+                    <a
+                        class="social-card reveal"
+                        style="--social-color: #ed3447;"
+                        href="https://gamebanana.com/members/5415323"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Ouvrir mon profil GameBanana"
+                    >
+                        <div class="social-icon">G</div>
+
+                        <div class="social-information">
+                            <h3>GameBanana</h3>
+                            <p>Membre 5415323</p>
+                        </div>
+
+                        <span class="social-arrow" aria-hidden="true">↗</span>
+                    </a>
+
+                    <a
+                        class="social-card reveal"
+                        style="--social-color: #d9a928;"
+                        href="https://www.speedrun.com/users/IATBBISpeedrun"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Ouvrir mon profil Speedrun.com"
+                    >
+                        <div class="social-icon">⏱</div>
+
+                        <div class="social-information">
+                            <h3>Speedrun.com</h3>
+                            <p>IATBBISpeedrun</p>
+                        </div>
+
+                        <span class="social-arrow" aria-hidden="true">↗</span>
+                    </a>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to action -->
+        <section class="section">
+            <div class="container">
+
+                <div class="contact-banner reveal">
+                    <h2>
+                        Prêt à découvrir
+                        <span class="gradient-text">mon univers ?</span>
+                    </h2>
+
+                    <p>
+                        Retrouve mes vidéos, mes créations et les prochaines
+                        nouveautés directement sur ma chaîne YouTube.
+                    </p>
+
+                    <a
+                        class="button button-primary"
+                        href="https://www.youtube.com/@IAmTheBestButInYoutube"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Accéder à ma chaîne
+                        <span aria-hidden="true">↗</span>
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+
+            <p>
+                © <span id="current-year"></span>
+                I Am The Best — Tous droits réservés.
+            </p>
+
+            <a class="back-to-top" href="#accueil">
+                Retour en haut ↑
+            </a>
+
+        </div>
+    </footer>
+
+    <script>
+        // Année automatique dans le pied de page
+        document.getElementById("current-year").textContent =
+            new Date().getFullYear();
+
+        // Apparence de la navigation pendant le défilement
+        const navbar = document.getElementById("navbar");
+
+        const updateNavbar = () => {
+            navbar.classList.toggle("scrolled", window.scrollY > 20);
+        };
+
+        window.addEventListener("scroll", updateNavbar, { passive: true });
+        updateNavbar();
+
+        // Animation d'apparition des éléments
+        const revealElements = document.querySelectorAll(".reveal");
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            {
+                threshold: 0.12
+            }
+        );
+
+        revealElements.forEach((element, index) => {
+            element.style.transitionDelay = `${(index % 3) * 80}ms`;
+            observer.observe(element);
+        });
+    </script>
+
+</body>
+</html>

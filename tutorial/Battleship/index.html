@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Battleship Tutorial & Solver</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #061826;
+      --panel: #0b2a3d;
+      --panel2: #103b55;
+      --cell: #1c6f94;
+      --cell-border: #4cb3d4;
+      --unknown: #1c6f94;
+      --miss: #dbeafe;
+      --hit: #ef4444;
+      --sunk: #7f1d1d;
+      --best: #facc15;
+      --text: #eaf8ff;
+      --muted: #9cc7d8;
+      --accent: #22d3ee;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top, #0e4664, transparent 40%),
+        linear-gradient(180deg, #04121d, #061826);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 28px 15px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    section {
+      background: rgba(11, 42, 61, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    h2, h3 {
+      margin-top: 0;
+    }
+
+    .toolbar,
+    .ship-list,
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    button,
+    select,
+    input[type="file"] {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #155e75;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0891b2;
+    }
+
+    button.active {
+      background: var(--accent);
+      color: #03202f;
+    }
+
+    button.danger {
+      background: #991b1b;
+    }
+
+    button.warning {
+      background: #ca8a04;
+      color: #111827;
+    }
+
+    .grid-wrapper {
+      overflow-x: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      max-width: 640px;
+      min-width: 340px;
+      margin: auto;
+    }
+
+    .cell {
+      aspect-ratio: 1 / 1;
+      background: var(--unknown);
+      border: 1px solid var(--cell-border);
+      border-radius: 6px;
+      color: white;
+      font-size: 11px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .cell:hover {
+      outline: 2px solid var(--accent);
+    }
+
+    .cell.unknown {
+      background: var(--unknown);
+    }
+
+    .cell.miss {
+      background: var(--miss);
+      color: #0f172a;
+    }
+
+    .cell.hit {
+      background: var(--hit);
+      color: white;
+    }
+
+    .cell.sunk {
+      background: var(--sunk);
+      color: white;
+    }
+
+    .cell.best {
+      outline: 3px solid var(--best);
+      box-shadow: 0 0 14px var(--best);
+    }
+
+    .probability {
+      position: absolute;
+      inset: 0;
+      background: rgba(250, 204, 21, 0);
+      pointer-events: none;
+    }
+
+    .cell-label {
+      position: relative;
+      z-index: 2;
+      font-size: 11px;
+      font-weight: bold;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .ship-ghost {
+      position: absolute;
+      inset: 12%;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px dashed rgba(255,255,255,0.55);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .dot.unknown { background: var(--unknown); }
+    .dot.miss { background: var(--miss); }
+    .dot.hit { background: var(--hit); }
+    .dot.sunk { background: var(--sunk); }
+    .dot.best { background: var(--best); }
+
+    .ship-card {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel2);
+      padding: 10px;
+      border-radius: 12px;
+      min-width: 160px;
+    }
+
+    .ship-card input {
+      transform: scale(1.2);
+    }
+
+    .ship-name {
+      font-weight: bold;
+    }
+
+    .ship-size {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      border-radius: 12px;
+      border: none;
+      padding: 12px;
+      background: #020617;
+      color: #d1fae5;
+      resize: vertical;
+    }
+
+    .info-box {
+      background: rgba(255,255,255,0.06);
+      border-left: 4px solid var(--accent);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    img.preview {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🚢 Battleship Tutorial & Solver</h1>
+    <p>Analyse toutes les positions possibles et conseille le meilleur tir.</p>
+  </header>
+<label>
+  Taille grille :
+  <input id="gridSizeInput" type="number" min="5" max="30" value="10" onchange="changeGridSizeManual()" />
+</label>
+
+<button onclick="autoDetectImageGrid()">🔍 Détection universelle</button>
+<button onclick="resetBoard()">♻️ Reset</button>
+
+  <main>
+    <section>
+      <h2>Grille</h2>
+
+      <div class="toolbar">
+        <button id="modeUnknown" class="active" onclick="setMode('unknown')">❔ Inconnu</button>
+        <button id="modeMiss" onclick="setMode('miss')">🌊 Eau</button>
+        <button id="modeHit" onclick="setMode('hit')">🔥 Touché</button>
+        <button id="modeSunk" onclick="setMode('sunk')">💀 Coulé</button>
+        <button onclick="solveBoard()">🧠 Calculer</button>
+        <button class="warning" onclick="autoWaterAroundSunk()">🌊 Eau autour coulés</button>
+        <button class="danger" onclick="resetBoard()">Réinitialiser</button>
+      </div>
+
+      <div class="grid-wrapper">
+        <div id="grid" class="grid"></div>
+      </div>
+
+      <div class="legend">
+        <span><i class="dot unknown"></i> Inconnu</span>
+        <span><i class="dot miss"></i> Eau</span>
+        <span><i class="dot hit"></i> Touché</span>
+        <span><i class="dot sunk"></i> Coulé</span>
+        <span><i class="dot best"></i> Meilleur tir</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Bateaux restants</h2>
+
+      <div id="ships" class="ship-list"></div>
+
+      <div class="info-box">
+        <strong>Meilleur tir :</strong>
+        <div id="bestShot">Aucun calcul pour l’instant.</div>
+      </div>
+
+      <div class="info-box">
+        <strong>Statistiques :</strong>
+        <div id="stats">Aucune donnée.</div>
+      </div>
+
+      <h3>Import / Export JSON</h3>
+
+      <div class="buttons">
+        <button onclick="exportJSON()">Exporter JSON</button>
+        <button onclick="importJSON()">Importer JSON</button>
+      </div>
+
+      <textarea id="jsonBox" placeholder="Le JSON apparaîtra ici..."></textarea>
+
+      <h3>Analyse image avec Tesseract.js</h3>
+
+      <input type="file" id="imageInput" accept="image/*" />
+      <div class="buttons">
+        <button onclick="runOCR()">Analyser image</button>
+      </div>
+
+      <div id="ocrStatus" class="status"></div>
+      <img id="preview" class="preview" />
+
+      <p class="small">
+        Tesseract.js peut lire du texte sur une capture.  
+        Pour reconnaître parfaitement les cases, il faudra idéalement une capture bien droite et nette.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    let SIZE = 10;
+    let detectedGrid = null;
+
+
+    const SHIPS = [
+      {
+        id: "carrier",
+        name: "Porte-avions",
+        size: 5
+      },
+      {
+        id: "battleship",
+        name: "Cuirassé",
+        size: 4
+      },
+      {
+        id: "cruiser",
+        name: "Croiseur",
+        size: 3
+      },
+      {
+        id: "submarine",
+        name: "Sous-marin",
+        size: 3
+      },
+      {
+        id: "destroyer",
+        name: "Destroyer",
+        size: 2
+      }
+    ];
+
+    let board = Array(SIZE * SIZE).fill("unknown");
+    let mode = "unknown";
+    let probabilities = Array(SIZE * SIZE).fill(0);
+    let bestIndex = null;
+    let allPlacements = [];
+
+    const grid = document.getElementById("grid");
+    const shipsContainer = document.getElementById("ships");
+
+    function indexToCoord(index) {
+      const row = Math.floor(index / SIZE);
+      const col = index % SIZE;
+      return {
+        row,
+        col,
+        label: String.fromCharCode(65 + col) + (row + 1)
+      };
+    }
+
+    function coordToIndex(row, col) {
+      return row * SIZE + col;
+    }
+
+    function changeGridSizeManual() {
+  const input = document.getElementById("gridSizeInput");
+  const newSize = parseInt(input.value, 10);
+
+  if (!newSize || newSize < 5 || newSize > 30) {
+    alert("Taille invalide. Choisis entre 5 et 30.");
+    return;
+  }
+
+  SIZE = newSize;
+  board = Array(SIZE * SIZE).fill("unknown");
+
+  createGrid();
+  solveBoard();
+}
+
+function resetBoard() {
+  board = Array(SIZE * SIZE).fill("unknown");
+  createGrid();
+  solveBoard();
+}
+
+function coordToIndex(row, col) {
+  return row * SIZE + col;
+}
+
+function indexToCoord(index) {
+  const row = Math.floor(index / SIZE);
+  const col = index % SIZE;
+
+  return {
+    row,
+    col,
+    label: String.fromCharCode(65 + row) + (col + 1)
+  };
+}
+async function autoDetectImageGrid() {
+  const file = imageInput.files[0];
+  const status = document.getElementById("ocrStatus");
+
+  if (!file) {
+    alert("Choisis d'abord une image.");
+    return;
+  }
+
+  status.textContent = "Détection universelle de la grille...";
+
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    const edges = detectGridLines(data, canvas.width, canvas.height);
+
+    if (!edges || !edges.vertical.length || !edges.horizontal.length) {
+      status.textContent = "Aucune grille détectée.";
+      alert("Impossible de détecter une grille. Essaie une capture plus nette.");
+      return;
+    }
+
+    const grid = estimateGridFromLines(edges.vertical, edges.horizontal);
+
+    if (!grid) {
+      status.textContent = "Grille trouvée mais impossible à calculer.";
+      alert("Grille détectée, mais taille impossible à estimer.");
+      return;
+    }
+
+    detectedGrid = grid;
+
+    SIZE = grid.size;
+    document.getElementById("gridSizeInput").value = SIZE;
+
+    board = readCellsFromDetectedGrid(ctx, grid);
+
+    createGrid();
+    solveBoard();
+
+    const json = {
+      version: 4,
+      game: "Battleship",
+      source: "universal-image-detection",
+      date: new Date().toISOString(),
+      size: SIZE,
+      detectedGrid: grid,
+      board
+    };
+
+    document.getElementById("jsonBox").value = JSON.stringify(json, null, 2);
+
+    status.textContent =
+      `Grille détectée : ${SIZE}x${SIZE}. JSON board généré.`;
+  };
+}
+
+function detectGridLines(data, width, height) {
+  const verticalScores = new Array(width).fill(0);
+  const horizontalScores = new Array(height).fill(0);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      if (isGridColor(r, g, b)) {
+        verticalScores[x]++;
+        horizontalScores[y]++;
+      }
+    }
+  }
+
+  const vertical = extractLinePositions(verticalScores, height * 0.20);
+  const horizontal = extractLinePositions(horizontalScores, width * 0.20);
+
+  return {
+    vertical,
+    horizontal
+  };
+}
+function isGridColor(r, g, b) {
+  const brightness = (r + g + b) / 3;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const saturation = max - min;
+
+  const greenGrid =
+    g > 120 &&
+    g > r * 1.25 &&
+    g > b * 1.25;
+
+  const whiteGrid =
+    brightness > 180 &&
+    saturation < 70;
+
+  const blueGrid =
+    b > 120 &&
+    g > 100 &&
+    r < 140;
+
+  const yellowGrid =
+    r > 150 &&
+    g > 150 &&
+    b < 120;
+
+  const redGrid =
+    r > 150 &&
+    g < 100 &&
+    b < 100;
+
+  return greenGrid || whiteGrid || blueGrid || yellowGrid || redGrid;
+}
+function extractLinePositions(scores, threshold) {
+  const raw = [];
+
+  for (let i = 0; i < scores.length; i++) {
+    if (scores[i] > threshold) {
+      raw.push(i);
+    }
+  }
+
+  if (raw.length === 0) return [];
+
+  const groups = [];
+  let current = [raw[0]];
+
+  for (let i = 1; i < raw.length; i++) {
+    if (raw[i] - raw[i - 1] <= 3) {
+      current.push(raw[i]);
+    } else {
+      groups.push(current);
+      current = [raw[i]];
+    }
+  }
+
+  groups.push(current);
+
+  return groups.map(group => {
+    const sum = group.reduce((a, b) => a + b, 0);
+    return Math.round(sum / group.length);
+  });
+}
+function estimateGridFromLines(vertical, horizontal) {
+  if (vertical.length < 6 || horizontal.length < 6) {
+    return null;
+  }
+
+  const bestVertical = cleanRegularLines(vertical);
+  const bestHorizontal = cleanRegularLines(horizontal);
+
+  if (!bestVertical || !bestHorizontal) {
+    return null;
+  }
+
+  const cols = bestVertical.length - 1;
+  const rows = bestHorizontal.length - 1;
+
+  const size = Math.min(cols, rows);
+
+  if (size < 5 || size > 30) {
+    return null;
+  }
+
+  return {
+    x: bestVertical[0],
+    y: bestHorizontal[0],
+    width: bestVertical[bestVertical.length - 1] - bestVertical[0],
+    height: bestHorizontal[bestHorizontal.length - 1] - bestHorizontal[0],
+    cols,
+    rows,
+    size,
+    verticalLines: bestVertical,
+    horizontalLines: bestHorizontal
+  };
+}
+function cleanRegularLines(lines) {
+  if (lines.length < 6) return null;
+
+  lines = [...new Set(lines)].sort((a, b) => a - b);
+
+  let bestSet = null;
+  let bestScore = -Infinity;
+
+  for (let start = 0; start < lines.length; start++) {
+    for (let end = start + 5; end < lines.length; end++) {
+      const subset = lines.slice(start, end + 1);
+      const distances = [];
+
+      for (let i = 1; i < subset.length; i++) {
+        distances.push(subset[i] - subset[i - 1]);
+      }
+
+      const avg =
+        distances.reduce((a, b) => a + b, 0) / distances.length;
+
+      if (avg < 8) continue;
+
+      let error = 0;
+
+      for (const d of distances) {
+        error += Math.abs(d - avg);
+      }
+
+      const regularity = 1 / (1 + error);
+      const lengthBonus = subset.length * 10;
+      const score = regularity * 1000 + lengthBonus;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestSet = subset;
+      }
+    }
+  }
+
+  return bestSet;
+}
+function readCellsFromDetectedGrid(ctx, grid) {
+  const result = Array(grid.size * grid.size).fill("unknown");
+
+  const cellW = grid.width / grid.cols;
+  const cellH = grid.height / grid.rows;
+
+  for (let row = 0; row < grid.size; row++) {
+    for (let col = 0; col < grid.size; col++) {
+      const cx = Math.floor(grid.x + col * cellW + cellW / 2);
+      const cy = Math.floor(grid.y + row * cellH + cellH / 2);
+
+      const sample = sampleCell(ctx, cx, cy, cellW, cellH);
+      const index = coordToIndex(row, col);
+
+      if (sample.isRed) {
+        result[index] = "hit";
+      } else if (sample.isWhite || sample.isBlue) {
+        result[index] = "miss";
+      } else if (sample.isStrongGreen) {
+        result[index] = "hit";
+      } else {
+        result[index] = "unknown";
+      }
+    }
+  }
+
+  return result;
+}
+function sampleCell(ctx, cx, cy, cellW, cellH) {
+  const radiusX = Math.max(2, Math.floor(cellW * 0.25));
+  const radiusY = Math.max(2, Math.floor(cellH * 0.25));
+
+  let red = 0;
+  let white = 0;
+  let blue = 0;
+  let green = 0;
+  let total = 0;
+
+  for (let y = cy - radiusY; y <= cy + radiusY; y++) {
+    for (let x = cx - radiusX; x <= cx + radiusX; x++) {
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+
+      const r = pixel[0];
+      const g = pixel[1];
+      const b = pixel[2];
+
+      const brightness = (r + g + b) / 3;
+
+      if (r > 150 && g < 100 && b < 100) red++;
+      if (brightness > 190 && Math.abs(r - g) < 50 && Math.abs(g - b) < 50) white++;
+      if (b > 130 && g > 100 && r < 120) blue++;
+      if (g > 130 && g > r * 1.25 && g > b * 1.25) green++;
+
+      total++;
+    }
+  }
+
+  return {
+    isRed: red / total > 0.08,
+    isWhite: white / total > 0.12,
+    isBlue: blue / total > 0.10,
+    isStrongGreen: green / total > 0.18
+  };
+}
+
+
+    function createGrid() {
+      grid.innerHTML = "";
+
+      for (let i = 0; i < SIZE * SIZE; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell unknown";
+        cell.dataset.index = i;
+
+        const probabilityLayer = document.createElement("div");
+        probabilityLayer.className = "probability";
+
+        const label = document.createElement("div");
+        label.className = "cell-label";
+        label.textContent = indexToCoord(i).label;
+
+        cell.appendChild(probabilityLayer);
+        cell.appendChild(label);
+
+        cell.addEventListener("click", () => {
+          board[i] = mode;
+          solveBoard();
+        });
+
+        grid.appendChild(cell);
+      }
+
+      renderBoard();
+    }
+
+    function createShips() {
+      shipsContainer.innerHTML = "";
+
+      SHIPS.forEach(ship => {
+        const card = document.createElement("label");
+        card.className = "ship-card";
+
+        card.innerHTML = `
+          <input type="checkbox" id="ship-${ship.id}" checked onchange="solveBoard()" />
+          <div>
+            <div class="ship-name">${ship.name}</div>
+            <div class="ship-size">Taille ${ship.size}</div>
+          </div>
+        `;
+
+        shipsContainer.appendChild(card);
+      });
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+
+      ["Unknown", "Miss", "Hit", "Sunk"].forEach(m => {
+        document.getElementById("mode" + m).classList.remove("active");
+      });
+
+      const id = "mode" + newMode.charAt(0).toUpperCase() + newMode.slice(1);
+      document.getElementById(id).classList.add("active");
+    }
+
+    function renderBoard() {
+      const cells = document.querySelectorAll(".cell");
+      const maxProbability = Math.max(...probabilities, 1);
+
+      cells.forEach((cell, i) => {
+        cell.className = "cell " + board[i];
+
+        if (i === bestIndex) {
+          cell.classList.add("best");
+        }
+
+        const probabilityLayer = cell.querySelector(".probability");
+        const label = cell.querySelector(".cell-label");
+
+        const opacity = probabilities[i] / maxProbability;
+        probabilityLayer.style.background = `rgba(250, 204, 21, ${opacity * 0.65})`;
+
+        if (probabilities[i] > 0 && board[i] === "unknown") {
+          label.textContent = probabilities[i];
+        } else {
+          label.textContent = indexToCoord(i).label;
+        }
+
+        const oldGhosts = cell.querySelectorAll(".ship-ghost");
+        oldGhosts.forEach(g => g.remove());
+      });
+
+      renderGhostShips();
+    }
+
+    function getActiveShips() {
+      return SHIPS.filter(ship => {
+        const checkbox = document.getElementById("ship-" + ship.id);
+        return checkbox && checkbox.checked;
+      });
+    }
+
+    function canPlaceShip(cells) {
+      for (const index of cells) {
+        if (board[index] === "miss") return false;
+        if (board[index] === "sunk") return false;
+      }
+
+      return true;
+    }
+
+    function placementTouchesHits(cells) {
+      const hitIndexes = board
+        .map((state, i) => state === "hit" ? i : null)
+        .filter(v => v !== null);
+
+      if (hitIndexes.length === 0) return true;
+
+      return hitIndexes.some(hit => cells.includes(hit));
+    }
+
+    function generatePlacementsForShip(ship) {
+      const placements = [];
+
+      for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE; col++) {
+          const horizontal = [];
+
+          for (let k = 0; k < ship.size; k++) {
+            const c = col + k;
+            if (c < SIZE) {
+              horizontal.push(coordToIndex(row, c));
+            }
+          }
+
+          if (horizontal.length === ship.size && canPlaceShip(horizontal)) {
+            placements.push({
+              ship,
+              cells: horizontal,
+              direction: "horizontal"
+            });
+          }
+
+          const vertical = [];
+
+          for (let k = 0; k < ship.size; k++) {
+            const r = row + k;
+            if (r < SIZE) {
+              vertical.push(coordToIndex(r, col));
+            }
+          }
+
+          if (vertical.length === ship.size && canPlaceShip(vertical)) {
+            placements.push({
+              ship,
+              cells: vertical,
+              direction: "vertical"
+            });
+          }
+        }
+      }
+
+      return placements;
+    }
+
+    function solveBoard() {
+      probabilities = Array(SIZE * SIZE).fill(0);
+      bestIndex = null;
+      allPlacements = [];
+
+      const activeShips = getActiveShips();
+
+      activeShips.forEach(ship => {
+        const placements = generatePlacementsForShip(ship);
+        allPlacements.push(...placements);
+
+        placements.forEach(placement => {
+          let weight = 1;
+
+          const hitCount = placement.cells.filter(i => board[i] === "hit").length;
+
+          if (hitCount > 0) {
+            weight += hitCount * 8;
+          }
+
+          placement.cells.forEach(index => {
+            if (board[index] === "unknown") {
+              probabilities[index] += weight;
+            }
+          });
+        });
+      });
+
+      let max = 0;
+
+      probabilities.forEach((value, index) => {
+        if (value > max && board[index] === "unknown") {
+          max = value;
+          bestIndex = index;
+        }
+      });
+
+      renderBoard();
+      updateInfo();
+    }
+
+    function updateInfo() {
+      const bestShot = document.getElementById("bestShot");
+      const stats = document.getElementById("stats");
+
+      if (bestIndex === null) {
+        bestShot.innerHTML = "Aucune case trouvée.";
+      } else {
+        const coord = indexToCoord(bestIndex);
+        bestShot.innerHTML = `
+          <strong>${coord.label}</strong><br>
+          Ligne ${coord.row + 1}, colonne ${coord.col + 1}<br>
+          Score : ${probabilities[bestIndex]}
+        `;
+      }
+
+      stats.innerHTML = `
+        Bateaux actifs : ${getActiveShips().length}<br>
+        Placements possibles : ${allPlacements.length}<br>
+        Cases touchées : ${board.filter(x => x === "hit").length}<br>
+        Cases à l’eau : ${board.filter(x => x === "miss").length}<br>
+        Cases coulées : ${board.filter(x => x === "sunk").length}
+      `;
+    }
+
+    function renderGhostShips() {
+      const cells = document.querySelectorAll(".cell");
+
+      const topPlacements = [...allPlacements]
+        .sort((a, b) => {
+          const scoreA = a.cells.reduce((sum, i) => sum + probabilities[i], 0);
+          const scoreB = b.cells.reduce((sum, i) => sum + probabilities[i], 0);
+          return scoreB - scoreA;
+        })
+        .slice(0, 25);
+
+      topPlacements.forEach(placement => {
+        placement.cells.forEach(index => {
+          if (board[index] === "unknown" || board[index] === "hit") {
+            const ghost = document.createElement("div");
+            ghost.className = "ship-ghost";
+            cells[index].appendChild(ghost);
+          }
+        });
+      });
+    }
+
+    function getNeighborsAroundCells(cells) {
+      const result = new Set();
+
+      cells.forEach(index => {
+        const { row, col } = indexToCoord(index);
+
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            const nr = row + dr;
+            const nc = col + dc;
+
+            if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+              const ni = coordToIndex(nr, nc);
+
+              if (!cells.includes(ni)) {
+                result.add(ni);
+              }
+            }
+          }
+        }
+      });
+
+      return [...result];
+    }
+
+    function findSunkGroups() {
+      const visited = new Set();
+      const groups = [];
+
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] !== "sunk" || visited.has(i)) continue;
+
+        const group = [];
+        const stack = [i];
+
+        while (stack.length > 0) {
+          const current = stack.pop();
+
+          if (visited.has(current)) continue;
+          visited.add(current);
+          group.push(current);
+
+          const { row, col } = indexToCoord(current);
+
+          const neighbors = [
+            [row - 1, col],
+            [row + 1, col],
+            [row, col - 1],
+            [row, col + 1]
+          ];
+
+          neighbors.forEach(([r, c]) => {
+            if (r >= 0 && r < SIZE && c >= 0 && c < SIZE) {
+              const ni = coordToIndex(r, c);
+              if (board[ni] === "sunk" && !visited.has(ni)) {
+                stack.push(ni);
+              }
+            }
+          });
+        }
+
+        groups.push(group);
+      }
+
+      return groups;
+    }
+
+    function autoWaterAroundSunk() {
+      const groups = findSunkGroups();
+
+      groups.forEach(group => {
+        const around = getNeighborsAroundCells(group);
+
+        around.forEach(index => {
+          if (board[index] === "unknown") {
+            board[index] = "miss";
+          }
+        });
+      });
+
+      solveBoard();
+    }
+
+    function resetBoard() {
+      if (!confirm("Réinitialiser toute la grille ?")) return;
+
+      board = Array(SIZE * SIZE).fill("unknown");
+      probabilities = Array(SIZE * SIZE).fill(0);
+      bestIndex = null;
+      allPlacements = [];
+
+      SHIPS.forEach(ship => {
+        const checkbox = document.getElementById("ship-" + ship.id);
+        checkbox.checked = true;
+      });
+
+      renderBoard();
+      updateInfo();
+    }
+
+    function exportJSON() {
+  const data = {
+    version: 4,
+    game: "Battleship",
+    size: SIZE,
+    date: new Date().toISOString(),
+    board,
+    ships: ships.map(ship => ({
+      id: ship.id,
+      name: ship.name,
+      size: ship.size,
+      active: document.getElementById("ship-" + ship.id)?.checked ?? true
+    })),
+    detectedGrid
+  };
+
+  document.getElementById("jsonBox").value = JSON.stringify(data, null, 2);
+}
+
+
+   function importJSON() {
+  try {
+    const text = document.getElementById("jsonBox").value;
+    const data = JSON.parse(text);
+
+    if (!data.board || !Array.isArray(data.board)) {
+      alert("JSON invalide : board manquant.");
+      return;
+    }
+
+    if (data.size) {
+      SIZE = data.size;
+      document.getElementById("gridSizeInput").value = SIZE;
+    } else {
+      SIZE = Math.sqrt(data.board.length);
+      SIZE = Math.round(SIZE);
+      document.getElementById("gridSizeInput").value = SIZE;
+    }
+
+    board = data.board.slice(0, SIZE * SIZE);
+
+    while (board.length < SIZE * SIZE) {
+      board.push("unknown");
+    }
+
+    detectedGrid = data.detectedGrid || null;
+
+    createGrid();
+    solveBoard();
+
+  } catch (error) {
+    console.error(error);
+    alert("Impossible d'importer le JSON.");
+  }
+}
+
+
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+
+      if (!file) return;
+
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+    });
+
+    async function runOCR() {
+      const file = imageInput.files[0];
+      const status = document.getElementById("ocrStatus");
+
+      if (!file) {
+        alert("Choisis d'abord une image.");
+        return;
+      }
+
+      status.textContent = "Analyse OCR en cours avec Tesseract.js...";
+
+      try {
+        const result = await Tesseract.recognize(
+          file,
+          "eng+fra",
+          {
+            logger: m => {
+              if (m.status) {
+                const percent = m.progress
+                  ? Math.round(m.progress * 100)
+                  : 0;
+
+                status.textContent = `${m.status} ${percent}%`;
+              }
+            }
+          }
+        );
+
+        const text = result.data.text;
+        status.textContent = "Analyse terminée.";
+
+        document.getElementById("jsonBox").value =
+          JSON.stringify({
+            type: "ocr-result",
+            date: new Date().toISOString(),
+            text
+          }, null, 2);
+
+        interpretOCRText(text);
+
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Erreur pendant l'analyse OCR.";
+      }
+    }
+
+    function interpretOCRText(text) {
+      const lower = text.toLowerCase();
+
+      const coordRegex = /([a-j])\s*([1-9]|10)/gi;
+      const matches = [...text.matchAll(coordRegex)];
+
+      matches.forEach(match => {
+        const letter = match[1].toUpperCase();
+        const number = parseInt(match[2], 10);
+
+        const col = letter.charCodeAt(0) - 65;
+        const row = number - 1;
+
+        if (row >= 0 && row < SIZE && col >= 0 && col < SIZE) {
+          const index = coordToIndex(row, col);
+
+          if (
+            lower.includes("touch") ||
+            lower.includes("hit") ||
+            lower.includes("feu")
+          ) {
+            board[index] = "hit";
+          } else if (
+            lower.includes("eau") ||
+            lower.includes("miss") ||
+            lower.includes("rat")
+          ) {
+            board[index] = "miss";
+          }
+        }
+      });
+
+      solveBoard();
+    }
+
+    createGrid();
+    createShips();
+    solveBoard();
+  </script>
+</body>
+</html>
