@@ -1384,20 +1384,38 @@ let allMods = [];
 
 async function loadMods() {
   try {
-    const response = await fetch("data/mods-index.json");
+    const response = await fetch(
+      `data/mods-index.json?timestamp=${Date.now()}`
+    );
 
     if (!response.ok) {
-      throw new Error("Impossible de charger l'index des mods.");
+      throw new Error(`Erreur HTTP ${response.status}`);
     }
 
-    const index = await response.json();
+    const text = await response.text();
+
+    if (!text.trim()) {
+      throw new Error("Le fichier mods-index.json est vide.");
+    }
+
+    let index;
+
+    try {
+      index = JSON.parse(text);
+    } catch {
+      throw new Error("Le fichier mods-index.json contient un JSON invalide.");
+    }
 
     allMods = Array.isArray(index.files) ? index.files : [];
 
     displayMods(allMods);
   } catch (error) {
-    console.error(error);
-    modsStatus.textContent = "❌ Impossible de charger les mods.";
+    console.error("Erreur de chargement des mods :", error);
+
+    modsStatus.textContent =
+      `❌ Impossible de charger les mods : ${error.message}`;
+
+    modsList.innerHTML = "";
   }
 }
 
