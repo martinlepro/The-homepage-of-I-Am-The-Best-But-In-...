@@ -1,0 +1,44 @@
+name: Generate Mods Index
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read   # lire le dépôt
+      pages: write    # écrire dans leartifact GitHub Pages
+      id-token: write  # authentification OIDC
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full clone pour voir l'historique
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --save-dev esm
+
+      - name: Generate mods-index.json
+        run: node scripts/generate-mods-index.js
+
+      - name: Verify output
+        run: |
+          echo "=== data/mods-index.json ===" && \
+          cat data/mods-index.json | head -30
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+          retention-days: 1
